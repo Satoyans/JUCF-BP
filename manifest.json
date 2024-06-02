@@ -1,0 +1,30 @@
+{
+	"format_version": 2,
+	"header": {
+		"name": "JsonUI_custom_formBP実験用",
+		"description": "実験用",
+		"min_engine_version": [1, 20, 80],
+		"uuid": "1f0bb78a-7dfc-4cd8-b227-f901892a402e",
+		"version": [1, 0, 1]
+	},
+	"modules": [
+		{
+			"type": "script",
+			"uuid": "b70a87da-8496-48da-8b2a-02596eed285e",
+			"language": "javascript",
+			"version": [1, 0, 0],
+			"entry": "scripts/main.js"
+		}
+	],
+	"dependencies": [
+		{
+			"module_name": "@minecraft/server",
+			"version": "1.10.0"
+		},
+		{
+			"module_name": "@minecraft/server-ui",
+			"version": "1.1.0"
+		},
+		{ "uuid": "bd2907ab-65c8-4f6c-a4cd-afbb715b57eb", "version": [1, 0, 0] }
+	]
+}
