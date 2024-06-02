@@ -66,6 +66,8 @@ export function encode(ui_elements, form_size) {
 		if (is_show_button) data1 += "button";
 		//ui_elementにis_show_closeを追加するか迷う
 		if (ui_element.is_show_close === true) data1 += "close";
+		if (ui_element.is_show_hover_text === true) data1 += "hover";
+
 		let data2 = text;
 		let data3 = button_hover_text;
 		let data4_temp = [`${w}`, `${h}`, `${offset_x_inc + x - count}`, `${offset_y_inc + y - 1}`];
