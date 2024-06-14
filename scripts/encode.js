@@ -76,7 +76,6 @@ export function encode(ui_elements, form_size) {
 	}
 	return output_obj;
 }
-
 //console.log(
 //	encode(
 //		[
