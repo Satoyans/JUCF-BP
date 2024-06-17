@@ -1,4 +1,5 @@
-function getTextLength(text) {
+import { customFormType } from "./class";
+function getTextLength(text: string) {
 	let all_count = 0;
 	for (let char of [...text.split("")]) {
 		const code_point_num = char.codePointAt(0);
@@ -11,12 +12,12 @@ function getTextLength(text) {
 	}
 	return all_count;
 }
-function fill_to_length(text, length, char = ";") {
+function fill_to_length(text: string, length: number, char = ";") {
 	if (getTextLength(text) < length) return fill_to_length(`${char}${text}`, length, char);
 	return text;
 }
 
-function data2sendText(...data) {
+function data2sendText(...data: string[]) {
 	const max_text_length = Math.max(...data.map((x) => getTextLength(x)));
 	let send_text = `${String(max_text_length).length}${max_text_length}`;
 	for (let text of data) {
@@ -25,40 +26,35 @@ function data2sendText(...data) {
 	return send_text;
 }
 
-function data2sendText_inside(...data) {
-	const fill_to_length2 = (text, length, isminus = false) => {
-		if (getTextLength(text) < length) return fill_to_length2(`0${text}`, length, isminus);
-		if (isminus) {
-			let split_text = text.split("");
-			split_text[0] = "-";
-			return split_text.join("");
-		}
-		return text;
-	};
+function fill_to_length_inside(text: string, length: number, isminus = false) {
+	if (getTextLength(text) < length) return fill_to_length_inside(`0${text}`, length, isminus);
+	if (isminus) {
+		let split_text = text.split("");
+		split_text[0] = "-";
+		return split_text.join("");
+	}
+	return text;
+}
+
+function data2sendText_inside(...data: string[]) {
 	const max_text_length = Math.max(...data.map((x) => getTextLength(x)));
 	let send_text = `${String(max_text_length).length}${max_text_length}`;
 	for (let text of data) {
-		send_text += fill_to_length2(text.replace("-", "0"), max_text_length, text[0] === "-");
+		send_text += fill_to_length_inside(text.replace("-", "0"), max_text_length, text[0] === "-");
 	}
 	return send_text;
 }
 
-/**
- *
- * @param {{x:number, y:number, w:number, h:number, is_show_button:boolean, is_show_image:boolean, is_show_text:boolean, text:string, image:string, button_hover_text:string }[]} ui_elements
- * @param {{x:string, y:string}} form_size
- * @returns
- */
 const RP_screen_size = { x: 465, y: 262 };
-export function encode(ui_elements, form_size) {
+export function encode(ui_elements: customFormType.elementPropertiesTypes.all[], form_size: { x: number; y: number }) {
 	//JSONUIの最大[465, 262]
 	const offset_x_inc = (RP_screen_size.x - form_size.x) / 2;
 	const offset_y_inc = (RP_screen_size.y - form_size.y) / 2;
-	const output_obj: { text: string; image: string }[] = [];
+	const output_obj: { text: string; texture: string }[] = [];
 	let count = 0;
 	for (let ui_element of ui_elements) {
 		count += 1;
-		const { x, y, w, h, is_show_button, is_show_image, is_show_text, text, texture, button_hover_text } = ui_element;
+		const { x, y, w, h, is_show_button, is_show_image, is_show_text, text, texture, hover_text } = ui_element;
 
 		let data1 = "";
 		if (is_show_text) data1 += "text";
@@ -67,12 +63,12 @@ export function encode(ui_elements, form_size) {
 		//ui_elementにis_show_closeを追加するか迷う
 		if (ui_element.is_show_close === true) data1 += "close";
 
-		let data2 = text;
-		let data3 = button_hover_text;
+		let data2 = `§z${text}`; //先頭が数字の場合消えるから対策として§z入れる
+		let data3 = hover_text;
 		let data4_temp = [`${w}`, `${h}`, `${offset_x_inc + x - count}`, `${offset_y_inc + y - 1}`];
 		let data4 = data2sendText_inside(...data4_temp);
 		let send_text = data2sendText(data1, data2, data3, data4);
-		output_obj.push({ text: send_text, image: texture });
+		output_obj.push({ text: send_text, texture });
 	}
 	return output_obj;
 }

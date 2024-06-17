@@ -1,6 +1,7 @@
 import { Player, system, world } from "@minecraft/server";
 import { ActionFormData } from "@minecraft/server-ui";
-import FORM_DATA from "./form_data";
+// import FORM_DATA from "./form_data";
+import { FORM_DATA, customFormType } from "./class";
 import { encode } from "./encode";
 
 const aux_x = 14;
@@ -16,7 +17,7 @@ function createElements(form_data) {
 			is_show_text: false,
 			is_show_image: true,
 			is_show_button: false,
-			button_hover_text: "",
+			hover_text: "",
 			w: x + aux_x - 8,
 			h: y + aux_y - 8,
 			x: aux_offset_x + 4,
@@ -29,7 +30,7 @@ function createElements(form_data) {
 			is_show_text: false,
 			is_show_image: true,
 			is_show_button: false,
-			button_hover_text: "",
+			hover_text: "",
 			w: x + aux_x,
 			h: y + aux_y,
 			x: aux_offset_x,
@@ -43,7 +44,7 @@ function createElements(form_data) {
 			is_show_image: false,
 			is_show_button: false,
 			is_show_close: true,
-			button_hover_text: "",
+			hover_text: "",
 			w: x + aux_x,
 			h: y + aux_y,
 			x: aux_offset_x,
@@ -56,16 +57,16 @@ function createElements(form_data) {
 			is_show_text: true,
 			is_show_image: false,
 			is_show_button: false,
-			button_hover_text: "",
+			is_show_close: false,
+			hover_text: "",
 			w: x + aux_x,
 			h: 30,
 			x: aux_offset_x,
 			y: aux_offset_y,
-			// text: `§0${title}${x}x${y}(${x + aux_x}x${y + aux_y})`,
 			text: `§0${title}`,
 			texture: "",
 		},
-	];
+	] as customFormType.elementPropertiesTypes.all[];
 	return encode(form_flame_elements.concat(...elements), { x, y });
 }
 
@@ -82,8 +83,8 @@ system.afterEvents.scriptEventReceive.subscribe(async (ev) => {
 	const form = new ActionFormData().title(raw_title_string);
 
 	for (let data of FORM_ELEMENTS_DATA) {
-		const { text, image } = data;
-		form.button(text, image);
+		const { text, texture } = data;
+		form.button(text, texture);
 	}
 
 	form.show(sender).then((response) => {
