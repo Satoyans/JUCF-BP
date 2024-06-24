@@ -1,5 +1,5 @@
 import { Player } from "@minecraft/server";
-import { ActionFormData } from "@minecraft/server-ui";
+import { ActionFormData, FormCancelationReason } from "@minecraft/server-ui";
 
 export namespace customFormType {
 	interface basePropertiesType {
@@ -56,7 +56,7 @@ export namespace customFormType {
 	}
 }
 
-class customForm {
+export class customForm {
 	private elements: customFormType.elementPropertiesTypes.all[] = [];
 	private labels: (string | undefined)[];
 	private x: number;
@@ -65,8 +65,10 @@ class customForm {
 
 	constructor(size: { x: number; y: number }, title: string) {
 		this.x = size.x;
-		this.y = size.x;
+		this.y = size.y;
 		this.title = title;
+		this.elements = [];
+		this.labels = [];
 	}
 
 	addElement(
@@ -166,17 +168,23 @@ class customForm {
 		const { elements, labels, x, y, title } = this.getFormData();
 		const encoder = this.encode(elements, labels, x, y, title);
 		const form = this.createActionForm(encoder.result);
-		return new Promise(async (resolve, reject) => {
+		type resultType = {
+			cancelationReason: FormCancelationReason | undefined;
+			selection: number | undefined;
+			selectedLabel: string | undefined;
+			canceled: boolean;
+		};
+		return new Promise(async (resolve: (arg: resultType) => void, reject: (e: Error) => void) => {
 			try {
 				const result = await form.show(player);
-				resolve({
+				return resolve({
 					cancelationReason: result.cancelationReason,
 					selection: result.selection,
 					selectedLabel: result.selection ? encoder.labels[result.selection] : undefined,
 					canceled: result.canceled,
 				});
 			} catch (e) {
-				reject(e);
+				return reject(new Error(String(e)));
 			}
 		});
 	}
