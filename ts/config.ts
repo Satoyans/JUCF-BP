@@ -1,3 +1,5 @@
+//現状使っていない
+//後で考える
 import { Player } from "@minecraft/server";
 
 export default (player: Player) => {
