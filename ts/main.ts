@@ -12,7 +12,7 @@ system.afterEvents.scriptEventReceive.subscribe(async (ev) => {
 });
 
 async function a(sender: Player, num: number) {
-	const custom_form = new customForm({ x: 300, y: 200 }, "カスタムなタイトル")
+	const custom_form = new customForm({ x: 300 + num * 7.5, y: 150 + num * 5 }, "カスタムなタイトル")
 		.addElement("image", 200, 50, 50, 25, "textures/blocks/beacon", "ビーコンの画像")
 		.addElement("text", 200, 50, 50, 25, "custom form class!", "ビーコン上のテキスト")
 		.addElement(
@@ -25,16 +25,17 @@ async function a(sender: Player, num: number) {
 				buttonOption: {},
 				hoverTextOption: { hover_text: "ホバーテキスト\n改行も可能！" },
 				imageOption: { texture: "textures/blocks/iron_block" },
-				textOption: { text: "閉じる" },
+				textOption: { text: "次の画面" },
 			},
-			"中央のボタン"
+			"次の画面"
 		)
-		.addElement("text", 50, 50, -100, 25, "外にも配置できる")
+		.addElement("text", 50, 50, -75, 25, "外にも\n配置できる")
 		.addElement("image", 50, 50, num * 10, 150, "textures/items/apple");
 
 	const result = await custom_form.sendPlayer(sender);
 	console.warn(`isCansel:${result.canceled}`);
 	console.warn(result.selectedLabel);
-	if (!result.canceled) return;
+
+	if (result.selectedLabel !== "次の画面") return;
 	a(sender, num + 1);
 }
