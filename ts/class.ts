@@ -311,9 +311,8 @@ class customFormEncoder {
 	}
 
 	private encode(ui_elements: customFormType.elementPropertiesTypes.all[], form_size: { x: number; y: number }) {
-		//JSONUIの最大[465, 262]
-		const offset_x_inc = (this.RP_screen_size.x - form_size.x) / 2;
-		const offset_y_inc = (this.RP_screen_size.y - form_size.y) / 2;
+		const offset_x_inc = (this.RP_screen_size.x - form_size.x) / 2 - 7;
+		const offset_y_inc = (this.RP_screen_size.y - form_size.y) / 2 - 15;
 		const output_obj: { text: string; texture: string }[] = [];
 		let count = 0;
 		for (let ui_element of ui_elements) {

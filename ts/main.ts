@@ -12,7 +12,8 @@ system.afterEvents.scriptEventReceive.subscribe(async (ev) => {
 });
 
 async function sendForm(sender: Player) {
-	const custom_form = new customForm({ x: 300, y: 150 }, "カスタムなタイトル")
+	const custom_form = new customForm({ x: 300, y: 200 }, "カスタムなタイトル")
+		.addElement("image", 300, 200, 0, 0, "textures/blocks/emerald_block", "棒")
 		.addElement("image", 200, 50, 50, 25, "textures/blocks/beacon", "ビーコンの画像")
 		.addElement("text", 200, 50, 50, 25, "custom form class!", "ビーコン上のテキスト")
 		.addElement(
