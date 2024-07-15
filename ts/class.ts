@@ -7,6 +7,7 @@ export namespace customFormType {
 		h: number;
 		x: number;
 		y: number;
+		label?: string;
 	}
 	export namespace elementPropertiesOption {
 		export interface buttonOption {
@@ -52,6 +53,55 @@ export namespace customFormType {
 			is_show_close: boolean;
 			is_show_text: boolean;
 			is_show_image: boolean;
+		}
+	}
+}
+
+export namespace formElementsVariableTypes {
+	interface basePropertiesType {
+		w: string; //変数使えるように
+		h: string; //変数使えるように
+		x: string; //変数使えるように
+		y: string; //変数使えるように
+		label?: string;
+	}
+	export namespace elementPropertiesOption {
+		export interface buttonOption {}
+		export interface closeButtonOption {}
+		export interface textOption {
+			text: string;
+		}
+		export interface imageOption {
+			texture: string;
+		}
+		export interface hoverTextOption {
+			hover_text: string;
+		}
+		export interface customOption {
+			buttonOption?: buttonOption;
+			closeButtonOption?: closeButtonOption;
+			textOption?: textOption;
+			imageOption?: imageOption;
+			hoverTextOption?: hoverTextOption;
+		}
+	}
+	export namespace elementPropertiesTypes {
+		export interface addButton extends basePropertiesType, elementPropertiesOption.buttonOption {}
+		export interface addCloseButton extends basePropertiesType, elementPropertiesOption.closeButtonOption {}
+		export interface addText extends basePropertiesType, elementPropertiesOption.textOption {}
+		export interface addImage extends basePropertiesType, elementPropertiesOption.imageOption {}
+		export interface addHoverText extends basePropertiesType, elementPropertiesOption.hoverTextOption {}
+		export interface all
+			extends basePropertiesType,
+				elementPropertiesOption.buttonOption,
+				elementPropertiesOption.closeButtonOption,
+				elementPropertiesOption.hoverTextOption,
+				elementPropertiesOption.imageOption,
+				elementPropertiesOption.textOption {
+			is_show_button: string; //変数
+			is_show_close: string; //変数
+			is_show_text: string; //変数
+			is_show_image: string; //変数
 		}
 	}
 }
@@ -168,12 +218,7 @@ export class customForm {
 		const { elements, labels, x, y, title } = this.getFormData();
 		const encoder = this.encode(elements, labels, x, y, title);
 		const form = this.createActionForm(encoder.result);
-		type resultType = {
-			cancelationReason: FormCancelationReason | undefined;
-			selection: number | undefined;
-			selectedLabel: string | undefined;
-			canceled: boolean;
-		};
+
 		return new Promise(async (resolve: (arg: resultType) => void, reject: (e: Error) => void) => {
 			try {
 				const result = await form.show(player);
@@ -189,6 +234,12 @@ export class customForm {
 		});
 	}
 }
+export type resultType = {
+	cancelationReason: FormCancelationReason | undefined;
+	selection: number | undefined;
+	selectedLabel: string | undefined;
+	canceled: boolean;
+};
 
 class customFormEncoder {
 	private RP_screen_size = { x: 465, y: 262 };
