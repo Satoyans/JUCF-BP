@@ -5,15 +5,6 @@ import { variableReplacer } from "./variableReplacer";
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
 
 system.afterEvents.scriptEventReceive.subscribe(async (ev) => {
-	if (ev.id !== "cf:form") return;
-	const sender = ev.sourceEntity;
-	if (!sender) return;
-	if (!(sender instanceof Player) || sender.typeId !== "minecraft:player") return; //tsの型判定用 || script用
-
-	sendForm(sender);
-});
-
-system.afterEvents.scriptEventReceive.subscribe(async (ev) => {
 	if (ev.id !== "cf:tag") return;
 	const sender = ev.sourceEntity;
 	if (!sender) return;
@@ -67,14 +58,6 @@ system.afterEvents.scriptEventReceive.subscribe(async (ev) => {
 					if (element.label !== undefined && Object.keys(element).length !== 12) throw new Error('エラー："element"のキーの数が異常です。');
 				}
 
-				console.warn(
-					JSON.stringify(form_name, null, 2),
-					JSON.stringify(form_size, null, 2),
-					is_show_form_frame,
-					JSON.stringify(variables, null, 2),
-					JSON.stringify(elements, null, 2)
-				);
-
 				if (world.getDynamicPropertyIds().includes(`cf:${form_name}`)) throw new Error(`エラー：フォーム"${form_name}"は既に存在します。`);
 				world.setDynamicProperty(`cf:${form_name}`, tag);
 				player.sendMessage(`フォーム名"${form_name}"を追加しました。`);
@@ -121,9 +104,9 @@ function send({ sender, id, message }: { sender: Player; id: string; message: st
 					w: Number.isNaN(Number(element.w)) ? 0 : Number(element.w),
 					x: Number.isNaN(Number(element.x)) ? 0 : Number(element.x),
 					y: Number.isNaN(Number(element.y)) ? 0 : Number(element.y),
-					text: String(element.text),
-					texture: String(element.texture),
-					hover_text: String(element.hover_text),
+					text: String(element.text).replace(/\\n/g, "\n"),
+					texture: String(element.texture).replace(/\\n/g, "\n"),
+					hover_text: String(element.hover_text).replace(/\\n/g, "\n"),
 					is_show_button: Boolean(element.is_show_button === "true"),
 					is_show_close: Boolean(element.is_show_close === "true"),
 					is_show_text: Boolean(element.is_show_text === "true"),
@@ -138,7 +121,9 @@ function send({ sender, id, message }: { sender: Player; id: string; message: st
 				y: Number.isNaN(Number(form_size.y)) ? 0 : Number(form_size.y),
 			};
 
-			const custom_form = new customForm({ ...converted_form_size }, form_name);
+			const is_show_form_frame = parsed_form_data["is_show_form_frame"] === "true";
+
+			const custom_form = new customForm({ ...converted_form_size }, form_name, is_show_form_frame);
 			converted_elements.map((element) => {
 				const options: customFormType.elementPropertiesOption.customOption = {};
 				if (element.is_show_button) options.buttonOption = {};
@@ -224,7 +209,7 @@ function gui(sender: Player) {
 		}
 		if (res2.selection === 3) {
 			//表示
-			send({ sender, id: `cfs:${selected_key}`, message: "" });
+			send({ sender, id: `cfs:${selected_key}`, message: "" }).catch((r) => console.warn(r));
 			sender.sendMessage(`"cf:${selected_key}"を表示しました。`);
 		}
 		if (res2.selection === 4) {
@@ -235,31 +220,4 @@ function gui(sender: Player) {
 			sender.sendMessage(`コンテンツログに出力しました。`);
 		}
 	});
-}
-
-async function sendForm(sender: Player) {
-	const custom_form = new customForm({ x: 300, y: 200 }, "カスタムなタイトル")
-		.addElement("custom", 30, 30, 0, 0, { textOption: { text: "ホバーテキスト\n改行も可能" }, imageOption: { texture: "textures/blocks/diamond_block" } })
-		.addElement("image", 200, 50, 50, 25, "textures/blocks/beacon", "ビーコンの画像")
-		.addElement("text", 200, 50, 50, 25, "custom form class!", "ビーコン上のテキスト")
-		.addElement(
-			"custom",
-			200,
-			50,
-			50,
-			100,
-			{
-				hoverTextOption: { hover_text: "ホバーテキスト\n改行も可能！" },
-				imageOption: { texture: "textures/blocks/iron_block" },
-			},
-			"次の画面"
-		)
-		.addElement("text", 50, 50, -75, 25, "外にも\n配置できる")
-		.addElement("image", 50, 50, 0, 150, "textures/items/apple");
-
-	const result = await custom_form.sendPlayer(sender);
-	console.warn(`isCansel:${result.canceled}`);
-	console.warn(result.selectedLabel);
-
-	if (result.selectedLabel !== "次の画面") return;
 }
