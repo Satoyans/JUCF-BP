@@ -1,6 +1,7 @@
 import { Player } from "@minecraft/server";
 
-export default (form_name: string, variable: { [key: string]: string }, message: string, args: { player?: Player }) => {
+export default (form_name: string, variable: { [key: string]: string }, message: string, args: { player: Player }) => {
+	//コマンドの引数をJSONにパース
 	let parse_arg: { [key: string]: string } = {};
 	if (message !== "") {
 		try {
@@ -14,21 +15,27 @@ export default (form_name: string, variable: { [key: string]: string }, message:
 		}
 	}
 
-	const player = args.player ?? ({} as Player);
+	//デフォルトの変数を定義
+	const default_variable: { [key: string]: string | number | boolean } = {
+		form_name: form_name,
+		player_nametag: args.player.nameTag,
+		player_location_x: args.player.location.x,
+		player_location_y: args.player.location.y,
+		player_location_z: args.player.location.z,
+	};
 
-	const variables: { [form_name: string]: { [key: string]: string | number | boolean } } = {
+	//フォームごとの変数を定義
+	const variables: { default: { [key: string]: string | number | boolean }; custom: { [form_name: string]: { [key: string]: string | number | boolean } } } = {
 		default: {
-			form_name: form_name,
-			player_name: player.nameTag,
-			player_location_x: player.location.x,
-			player_location_y: player.location.y,
-			player_location_z: player.location.z,
-
 			...variable,
+			...default_variable,
 			...parse_arg,
+		},
+		custom: {
+			custom_form: { ...default_variable },
 		},
 	};
 
-	if (variables[form_name] === undefined) return variables.default;
-	return variables[form_name];
+	//フォーム名にあった変数があるならそれを返し、なければデフォルトの変数を返す
+	return variables.custom[form_name] ?? variables.default;
 };
