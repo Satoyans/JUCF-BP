@@ -112,13 +112,15 @@ export class customForm {
 	private x: number;
 	private y: number;
 	private title: string;
+	is_show_form_frame: boolean;
 
-	constructor(size: { x: number; y: number }, title: string) {
+	constructor(size: { x: number; y: number }, title: string, is_show_form_frame: boolean) {
 		this.x = size.x;
 		this.y = size.y;
 		this.title = title;
 		this.elements = [];
 		this.labels = [];
+		this.is_show_form_frame = is_show_form_frame;
 	}
 
 	addElement(
@@ -202,7 +204,7 @@ export class customForm {
 	}
 
 	private encode(elements: customFormType.elementPropertiesTypes.all[], labels: (string | undefined)[], x: number, y: number, title: string) {
-		return new customFormEncoder(elements, labels, { x, y }, title);
+		return new customFormEncoder(elements, labels, { x, y }, title, this.is_show_form_frame);
 	}
 
 	private createActionForm(form_data: { text: string; texture: string }[]) {
@@ -250,7 +252,7 @@ class customFormEncoder {
 	result: { text: string; texture: string }[];
 	labels: (string | undefined)[];
 
-	constructor(elements: customFormType.elementPropertiesTypes.all[], labels: (string | undefined)[], size: { x: number; y: number }, title: string) {
+	constructor(elements: customFormType.elementPropertiesTypes.all[], labels: (string | undefined)[], size: { x: number; y: number }, title: string, is_show_form_frame: boolean) {
 		const { x, y } = size;
 		const form_frame_elements: customFormType.elementPropertiesTypes.all[] = [
 			{
@@ -311,7 +313,8 @@ class customFormEncoder {
 			},
 		];
 		const form_frame_labels: (string | undefined)[] = ["backgroundImage", "frameImage", "closeButton", "titleText"];
-		this.result = this.encode(form_frame_elements.concat(...elements), size);
+		const target_form_elements = is_show_form_frame ? form_frame_elements.concat(...elements) : elements;
+		this.result = this.encode(target_form_elements, size);
 		this.labels = form_frame_labels.concat(labels);
 	}
 
@@ -329,8 +332,9 @@ class customFormEncoder {
 		return all_count;
 	}
 	private fill_to_length(text: string, length: number, char = ";") {
-		if (this.getTextLength(text) < length) return this.fill_to_length(`${char}${text}`, length, char);
-		return text;
+		if (length === this.getTextLength(text)) return text;
+		//charが1文字以外になることを考慮してない
+		return `${[...Array(length - this.getTextLength(text)).fill(char)].join("")}${text}`;
 	}
 
 	private data2sendText(...data: string[]) {
