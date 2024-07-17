@@ -139,7 +139,7 @@ function send({ sender, id, message }: { sender: Player; id: string; message: st
 }
 
 system.afterEvents.scriptEventReceive.subscribe(async (ev) => {
-	if (ev.id !== "cf:gui") return;
+	if (ev.id !== "cf:list") return;
 	const sender = ev.sourceEntity;
 	if (!sender) return;
 	if (!(sender instanceof Player) || sender.typeId !== "minecraft:player") return; //tsの型判定用 || script用
@@ -147,7 +147,7 @@ system.afterEvents.scriptEventReceive.subscribe(async (ev) => {
 	gui(sender);
 });
 function gui(sender: Player) {
-	const form = new ActionFormData().title("custom form gui");
+	const form = new ActionFormData().title("custom form list");
 	const form_keys = world
 		.getDynamicPropertyIds()
 		.filter((v) => v.startsWith("cf:"))
@@ -160,7 +160,7 @@ function gui(sender: Player) {
 		const selected_key = form_keys[res.selection];
 
 		const res2 = await new ActionFormData()
-			.title("custom form gui")
+			.title("custom form list")
 			.body(`cf:${selected_key}`)
 			.button("改名")
 			.button("コピー")
@@ -173,7 +173,7 @@ function gui(sender: Player) {
 		if (res2.selection === 0) {
 			//改名
 			const rename = async (sender: Player) => {
-				const res3 = await new ModalFormData().title("custom form gui").textField("変更後のフォーム名", "", selected_key).show(sender);
+				const res3 = await new ModalFormData().title("custom form list").textField("変更後のフォーム名", "", selected_key).show(sender);
 				if (res3.canceled) return;
 				if (res3.formValues === undefined) return;
 				if (typeof res3.formValues[0] !== "string") return;
