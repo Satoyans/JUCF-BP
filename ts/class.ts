@@ -112,7 +112,7 @@ export class customForm {
 	private x: number;
 	private y: number;
 	private title: string;
-	is_show_form_frame: boolean;
+	private is_show_form_frame: boolean;
 
 	constructor(size: { x: number; y: number }, title: string, is_show_form_frame: boolean) {
 		this.x = size.x;
