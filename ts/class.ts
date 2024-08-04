@@ -145,15 +145,16 @@ export class customForm {
 	addElement(type: "text", sizeW: number, sizeH: number, offsetX: number, offsetY: number, text: string, selectedLabel?: string): customForm;
 	addElement(type: "hover_text", sizeW: number, sizeH: number, offsetX: number, offsetY: number, hover_text: string, selectedLabel?: string): customForm;
 	addElement(type: "image", sizeW: number, sizeH: number, offsetX: number, offsetY: number, texture: string, selectedLabel?: string): customForm;
+	addElement(type: "item", sizeW: number, sizeH: number, offsetX: number, offsetY: number, aux: number, selectedLabel?: string): customForm;
 	addElement(type: "button", sizeW: number, sizeH: number, offsetX: number, offsetY: number, selectedLabel?: string): customForm;
 	addElement(type: "close_button", sizeW: number, sizeH: number, offsetX: number, offsetY: number, selectedLabel?: string): customForm;
 	addElement(
-		type: "button" | "close_button" | "text" | "hover_text" | "image" | "custom",
+		type: "button" | "close_button" | "text" | "hover_text" | "image" | "item" | "custom",
 		sizeW: number,
 		sizeH: number,
 		offsetX: number,
 		offsetY: number,
-		...args: (string | customFormType.elementPropertiesOption.customOption | undefined)[]
+		...args: (string | number | customFormType.elementPropertiesOption.customOption | undefined)[]
 	): customForm {
 		let label: string | undefined = undefined;
 		const properties: customFormType.elementPropertiesTypes.all = {
@@ -194,15 +195,22 @@ export class customForm {
 				properties.is_show_image = true;
 				label = args[1] as string | undefined;
 				break;
+			case "item":
+				properties.aux = args[0] as number;
+				properties.is_show_item = true;
+				label = args[1] as string | undefined;
+				break;
 			case "custom":
 				const custom_option = args[0] as customFormType.elementPropertiesOption.customOption;
 				properties.is_show_button = custom_option.buttonOption !== undefined;
 				properties.is_show_close = custom_option.closeButtonOption !== undefined;
 				properties.is_show_image = custom_option.imageOption !== undefined;
 				properties.is_show_text = custom_option.textOption !== undefined;
+				properties.is_show_item = custom_option.itemRendererOption !== undefined;
 				properties.text = custom_option.textOption?.text ?? "";
 				properties.texture = custom_option.imageOption?.texture ?? "";
 				properties.hover_text = custom_option.hoverTextOption?.hover_text ?? "";
+				properties.aux = custom_option.itemRendererOption?.aux ?? 0;
 				label = args[1] as string | undefined;
 				break;
 		}

@@ -60,8 +60,8 @@ system.afterEvents.scriptEventReceive.subscribe(async (ev) => {
 					)
 						throw new Error('エラー："element"のキーが不足しています。');
 					//labelの対策
-					if (element.label === undefined && Object.keys(element).length !== 11) throw new Error('エラー："element"のキーの数が異常です。');
-					if (element.label !== undefined && Object.keys(element).length !== 12) throw new Error('エラー："element"のキーの数が異常です。');
+					if (element.label === undefined && Object.keys(element).length !== 13) throw new Error('エラー："element"のキーの数が異常です。');
+					if (element.label !== undefined && Object.keys(element).length !== 14) throw new Error('エラー："element"のキーの数が異常です。');
 				}
 
 				world.setDynamicProperty(`cf:${form_name}`, tag);
