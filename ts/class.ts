@@ -10,23 +10,19 @@ export namespace customFormType {
 		label?: string;
 	}
 	export namespace elementPropertiesOption {
-		export interface buttonOption {
-			// is_show_button?: boolean;
-		}
-		export interface closeButtonOption {
-			// is_show_close?: boolean;
-		}
+		export interface buttonOption {}
+		export interface closeButtonOption {}
 		export interface textOption {
 			text: string;
-			// is_show_text?: boolean;
 		}
 		export interface imageOption {
 			texture: string;
-			// is_show_image?: boolean;
 		}
 		export interface hoverTextOption {
 			hover_text: string;
-			// is_show_hover?: boolean; //実際は使っていない、falseならhover_textを""にするだけ
+		}
+		export interface itemRendererOption {
+			aux: number;
 		}
 		export interface customOption {
 			buttonOption?: buttonOption;
@@ -34,6 +30,7 @@ export namespace customFormType {
 			textOption?: textOption;
 			imageOption?: imageOption;
 			hoverTextOption?: hoverTextOption;
+			itemRendererOption?: itemRendererOption;
 		}
 	}
 	export namespace elementPropertiesTypes {
@@ -42,17 +39,20 @@ export namespace customFormType {
 		export interface addText extends basePropertiesType, elementPropertiesOption.textOption {}
 		export interface addImage extends basePropertiesType, elementPropertiesOption.imageOption {}
 		export interface addHoverText extends basePropertiesType, elementPropertiesOption.hoverTextOption {}
+		export interface addItemRenderer extends basePropertiesType, elementPropertiesOption.itemRendererOption {}
 		export interface all
 			extends basePropertiesType,
 				elementPropertiesOption.buttonOption,
 				elementPropertiesOption.closeButtonOption,
 				elementPropertiesOption.hoverTextOption,
 				elementPropertiesOption.imageOption,
+				elementPropertiesOption.itemRendererOption,
 				elementPropertiesOption.textOption {
 			is_show_button: boolean;
 			is_show_close: boolean;
 			is_show_text: boolean;
 			is_show_image: boolean;
+			is_show_item: boolean;
 		}
 	}
 }
@@ -77,12 +77,16 @@ export namespace formElementsVariableTypes {
 		export interface hoverTextOption {
 			hover_text: string;
 		}
+		export interface itemRendererOption {
+			aux: string; //変数のため
+		}
 		export interface customOption {
 			buttonOption?: buttonOption;
 			closeButtonOption?: closeButtonOption;
 			textOption?: textOption;
 			imageOption?: imageOption;
 			hoverTextOption?: hoverTextOption;
+			itemRendererOption?: itemRendererOption;
 		}
 	}
 	export namespace elementPropertiesTypes {
@@ -91,21 +95,27 @@ export namespace formElementsVariableTypes {
 		export interface addText extends basePropertiesType, elementPropertiesOption.textOption {}
 		export interface addImage extends basePropertiesType, elementPropertiesOption.imageOption {}
 		export interface addHoverText extends basePropertiesType, elementPropertiesOption.hoverTextOption {}
+		export interface addItemRenderer extends basePropertiesType, elementPropertiesOption.itemRendererOption {}
 		export interface all
 			extends basePropertiesType,
 				elementPropertiesOption.buttonOption,
 				elementPropertiesOption.closeButtonOption,
 				elementPropertiesOption.hoverTextOption,
 				elementPropertiesOption.imageOption,
+				elementPropertiesOption.itemRendererOption,
 				elementPropertiesOption.textOption {
-			is_show_button: string; //変数
-			is_show_close: string; //変数
-			is_show_text: string; //変数
-			is_show_image: string; //変数
+			is_show_button: string; //変数使えるように
+			is_show_close: string; //変数使えるように
+			is_show_text: string; //変数使えるように
+			is_show_image: string; //変数使えるように
+			is_show_item: string; //変数使えるように
 		}
 	}
 }
 
+/**
+ * JUCFのフォームを簡単に作成出来るようにするための`ActionFormData`の拡張クラスです。
+ */
 export class customForm {
 	private elements: customFormType.elementPropertiesTypes.all[] = [];
 	private labels: (string | undefined)[];
@@ -154,10 +164,12 @@ export class customForm {
 			hover_text: "",
 			text: "",
 			texture: "",
+			aux: 0,
 			is_show_button: false,
 			is_show_close: false,
 			is_show_image: false,
 			is_show_text: false,
+			is_show_item: false,
 		};
 		switch (type) {
 			case "button":
@@ -261,6 +273,7 @@ class customFormEncoder {
 				is_show_image: true,
 				is_show_button: false,
 				is_show_close: false,
+				is_show_item: false,
 				hover_text: "",
 				w: x + this.aux_x - 8,
 				h: y + this.aux_y - 8,
@@ -268,6 +281,7 @@ class customFormEncoder {
 				y: this.aux_offset_y + 4,
 				text: "",
 				texture: "textures/ui/translucent_black",
+				aux: 0,
 			},
 			{
 				//枠
@@ -275,6 +289,7 @@ class customFormEncoder {
 				is_show_image: true,
 				is_show_button: false,
 				is_show_close: false,
+				is_show_item: false,
 				hover_text: "",
 				w: x + this.aux_x,
 				h: y + this.aux_y,
@@ -282,6 +297,7 @@ class customFormEncoder {
 				y: this.aux_offset_y,
 				text: "",
 				texture: "textures/ui/dialog_background_hollow_3",
+				aux: 0,
 			},
 			{
 				//X
@@ -289,6 +305,7 @@ class customFormEncoder {
 				is_show_image: false,
 				is_show_button: false,
 				is_show_close: true,
+				is_show_item: false,
 				hover_text: "",
 				w: x + this.aux_x,
 				h: y + this.aux_y,
@@ -296,6 +313,7 @@ class customFormEncoder {
 				y: this.aux_offset_y,
 				text: "",
 				texture: "",
+				aux: 0,
 			},
 			{
 				//Title
@@ -303,6 +321,7 @@ class customFormEncoder {
 				is_show_image: false,
 				is_show_button: false,
 				is_show_close: false,
+				is_show_item: false,
 				hover_text: "",
 				w: x + this.aux_x,
 				h: 30,
@@ -310,12 +329,13 @@ class customFormEncoder {
 				y: this.aux_offset_y,
 				text: `§0${title}`,
 				texture: "",
+				aux: 0,
 			},
 		];
-		const form_frame_labels: (string | undefined)[] = ["backgroundImage", "frameImage", "closeButton", "titleText"];
+		const form_frame_labels: (string | undefined)[] = is_show_form_frame ? ["backgroundImage", "frameImage", "closeButton", "titleText", ...labels] : labels;
 		const target_form_elements = is_show_form_frame ? form_frame_elements.concat(...elements) : elements;
 		this.result = this.encode(target_form_elements, size);
-		this.labels = form_frame_labels.concat(labels);
+		this.labels = form_frame_labels;
 	}
 
 	private getTextLength(text: string) {
@@ -372,20 +392,24 @@ class customFormEncoder {
 		let count = 0;
 		for (let ui_element of ui_elements) {
 			count += 1;
-			const { x, y, w, h, is_show_button, is_show_image, is_show_text, text, texture, hover_text } = ui_element;
+			const { x, y, w, h, is_show_button, is_show_image, is_show_text, is_show_close, is_show_item, text, texture, hover_text } = ui_element;
 
 			let data1 = "";
 			if (is_show_text) data1 += "text";
 			if (is_show_image) data1 += "image";
 			if (is_show_button) data1 += "button";
-			//ui_elementにis_show_closeを追加するか迷う
-			if (ui_element.is_show_close === true) data1 += "close";
+			if (is_show_close) data1 += "close";
+			if (is_show_item) data1 += "item";
+			//TODO
 
-			let data2 = `§z${text}`; //先頭が数字の場合消えるから対策として§z入れる
+			let data2 = `§z${text}${count - 1 + -445 * 65536}`; //先頭が数字の場合消えるから対策として§z入れる
 			let data3 = hover_text;
 			let data4_temp = [`${w}`, `${h}`, `${offset_x_inc + x - count}`, `${offset_y_inc + y - 1}`];
 			let data4 = this.data2sendText_inside(...data4_temp);
-			let send_text = this.data2sendText(data1, data2, data3, data4);
+
+			//TODO
+			let data5 = String(count - 1 + -445 * 65536);
+			let send_text = this.data2sendText(data1, data2, data3, data4, data5);
 			output_obj.push({ text: send_text, texture });
 		}
 		return output_obj;

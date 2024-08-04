@@ -21,6 +21,8 @@ system.afterEvents.scriptEventReceive.subscribe(async (ev) => {
 				if (form_name === undefined) throw new Error('エラー："form_name"を取得できませんでした。');
 				if (typeof form_name !== "string") throw new Error('エラー："form_name"の型がstringではありません。');
 				if (form_name === "") throw new Error('エラー："form_name"は空に出来ません。');
+				//既に同じ名前のフォームが無いかチェック
+				if (world.getDynamicPropertyIds().includes(`cf:${form_name}`)) throw new Error(`エラー：フォーム"${form_name}"は既に存在します。`);
 
 				const form_size = parse.form_size;
 				if (form_size === undefined) throw new Error('エラー："form_size"を取得できませんでした。');
@@ -49,17 +51,19 @@ system.afterEvents.scriptEventReceive.subscribe(async (ev) => {
 						element.text === undefined ||
 						element.texture === undefined ||
 						element.hover_text === undefined ||
+						element.aux === undefined ||
 						element.is_show_text === undefined ||
 						element.is_show_image === undefined ||
 						element.is_show_button === undefined ||
-						element.is_show_close === undefined
+						element.is_show_close === undefined ||
+						element.is_show_item === undefined
 					)
 						throw new Error('エラー："element"のキーが不足しています。');
+					//labelの対策
 					if (element.label === undefined && Object.keys(element).length !== 11) throw new Error('エラー："element"のキーの数が異常です。');
 					if (element.label !== undefined && Object.keys(element).length !== 12) throw new Error('エラー："element"のキーの数が異常です。');
 				}
 
-				if (world.getDynamicPropertyIds().includes(`cf:${form_name}`)) throw new Error(`エラー：フォーム"${form_name}"は既に存在します。`);
 				world.setDynamicProperty(`cf:${form_name}`, tag);
 				player.sendMessage(`フォーム名"${form_name}"を追加しました。`);
 			} catch (e) {
@@ -93,16 +97,15 @@ function send({ sender, id, message }: { sender: Player; id: string; message: st
 				//forms.tsに追加されている場合
 				const { form, response } = forms[id.replace("cfs:", "")];
 				const result = await form(sender).sendPlayer(sender);
+				//登録されている関数を実行する
 				response(result, sender);
 				return result;
 			} else {
-				//ない場合
+				//されていない場合
 				const form_name = id.replace("cfs:", "");
 				const form_data = world.getDynamicProperty(`cf:${form_name}`) as string | undefined;
 				if (form_data === undefined) return sender.sendMessage(`エラー：フォーム"${form_name}"は見つかりませんでした。`);
 				//全体パース=>変数取得=>要素文字化=>要素置き換え=>要素パース
-				// const variable = variables(form_name, sender, message);
-				// const replaced_form_data = variableReplacer(form_data, variable);
 				const parsed_form_data = JSON.parse(form_data);
 				const variables_value = parsed_form_data["variables"];
 				const variable = variables(form_name, variables_value, message, { player: sender });
@@ -117,10 +120,12 @@ function send({ sender, id, message }: { sender: Player; id: string; message: st
 						text: String(element.text).replace(/\\n/g, "\n"),
 						texture: String(element.texture).replace(/\\n/g, "\n"),
 						hover_text: String(element.hover_text).replace(/\\n/g, "\n"),
+						aux: Number.isNaN(Number(element.aux)) ? 0 : Number(element.aux),
 						is_show_button: Boolean(element.is_show_button === "true"),
 						is_show_close: Boolean(element.is_show_close === "true"),
 						is_show_text: Boolean(element.is_show_text === "true"),
 						is_show_image: Boolean(element.is_show_image === "true"),
+						is_show_item: Boolean(element.is_show_item === "true"),
 						label: element.label,
 					};
 					return converted_form_data;
@@ -140,6 +145,7 @@ function send({ sender, id, message }: { sender: Player; id: string; message: st
 					if (element.is_show_close) options.closeButtonOption = {};
 					if (element.is_show_image) options.imageOption = { texture: element.texture };
 					if (element.is_show_text) options.textOption = { text: element.text };
+					if (element.is_show_item) options.itemRendererOption = { aux: element.aux };
 					if (element.hover_text !== "") options.hoverTextOption = { hover_text: element.hover_text };
 					custom_form.addElement("custom", element.w, element.h, element.x, element.y, options, element.label);
 				});
