@@ -392,7 +392,7 @@ class customFormEncoder {
 		let count = 0;
 		for (let ui_element of ui_elements) {
 			count += 1;
-			const { x, y, w, h, is_show_button, is_show_image, is_show_text, is_show_close, is_show_item, text, texture, hover_text } = ui_element;
+			const { x, y, w, h, is_show_button, is_show_image, is_show_text, is_show_close, is_show_item, text, texture, hover_text, aux } = ui_element;
 
 			let data1 = "";
 			if (is_show_text) data1 += "text";
@@ -400,15 +400,13 @@ class customFormEncoder {
 			if (is_show_button) data1 += "button";
 			if (is_show_close) data1 += "close";
 			if (is_show_item) data1 += "item";
-			//TODO
 
-			let data2 = `§z${text}${count - 1 + -445 * 65536}`; //先頭が数字の場合消えるから対策として§z入れる
+			let data2 = `§z${text}`; //先頭が数字の場合消えるから対策として§z入れる
 			let data3 = hover_text;
 			let data4_temp = [`${w}`, `${h}`, `${offset_x_inc + x - count}`, `${offset_y_inc + y - 1}`];
 			let data4 = this.data2sendText_inside(...data4_temp);
 
-			//TODO
-			let data5 = String(count - 1 + -445 * 65536);
+			let data5 = String(aux);
 			let send_text = this.data2sendText(data1, data2, data3, data4, data5);
 			output_obj.push({ text: send_text, texture });
 		}
