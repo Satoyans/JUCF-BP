@@ -96,7 +96,7 @@ function send({ sender, id, message }: { sender: Player; id: string; message: st
 			if (forms[id.replace("cfs:", "")]) {
 				//forms.tsに追加されている場合
 				const { form, response } = forms[id.replace("cfs:", "")];
-				const result = await form(sender).sendPlayer(sender);
+				const result = await form(sender, message).sendPlayer(sender);
 				//登録されている関数を実行する
 				response(result, sender);
 				return result;
