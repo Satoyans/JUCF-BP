@@ -1,6 +1,7 @@
-import { Player } from "@minecraft/server";
+import { Player, system, world } from "@minecraft/server";
 import { customForm, resultType } from "./class";
 import { typeIdToID } from "./typeIds.js";
+import { FormCancelationReason, uiManager } from "@minecraft/server-ui";
 
 type formsType =
 	| {
@@ -68,4 +69,34 @@ export default <formsType>{
 			player.runCommand(`/scriptevent cfs:アイテムレンダラーフォーム {"page":${result.selectedLabel.slice(2)}}`);
 		},
 	},
+	//@minecraft/server-ui@1.3.0-betaのUiManagerが必要
+	//更新フォーム: {
+	//	form: (player: Player, message: string) => {
+	//		let count = Number(message);
+	//		if (Number.isNaN(count)) count = 0;
+	//		const form = new customForm({ x: 200, y: 150 }, "チャット", true);
+	//		form.addElement("text", 10, 10, 0, 10, `${new Date().toDateString()}`);
+	//		form.addElement("text", 10, 10, 0, 20, `count:${count + 1}`);
+	//
+	//		const player_name = player.name;
+	//		chat_form_set.add(player_name);
+	//		system.runTimeout(() => {
+	//			if (!chat_form_set.has(player_name)) return;
+	//			chat_form_delete_flag_set.add(player_name);
+	//			uiManager.closeAllForms(player);
+	//			const send_players = world.getPlayers({ name: player_name });
+	//			if (send_players.length === 0) return;
+	//			const send_player = send_players[0];
+	//			send_player.runCommand(`scriptevent cfs:更新フォーム ${count + 1}`);
+	//		}, 20);
+	//
+	//		return form;
+	//	},
+	//	response: (result, player) => {
+	//		if (!chat_form_delete_flag_set.has(player.name)) chat_form_set.delete(player.name);
+	//		chat_form_delete_flag_set.delete(player.name);
+	//	},
+	//},
 };
+const chat_form_set = new Set<string>();
+const chat_form_delete_flag_set = new Set<string>();
