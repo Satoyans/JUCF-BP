@@ -1,7 +1,7 @@
 import { Player, ScriptEventCommandMessageAfterEvent, system, world } from "@minecraft/server";
 import { customForm, customFormType, formElementsVariableTypes, resultType } from "./class";
 import variables from "./variables";
-import forms from "./forms";
+
 import { variableReplacer } from "./variableReplacer";
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
 
@@ -50,6 +50,7 @@ system.afterEvents.scriptEventReceive.subscribe(async (ev) => {
 						element.h === undefined ||
 						element.text === undefined ||
 						element.texture === undefined ||
+						element.command === undefined ||
 						element.hover_text === undefined ||
 						element.aux === undefined ||
 						element.is_show_text === undefined ||
@@ -58,10 +59,10 @@ system.afterEvents.scriptEventReceive.subscribe(async (ev) => {
 						element.is_show_close === undefined ||
 						element.is_show_item === undefined
 					)
-						throw new Error('エラー："element"のキーが不足しています。');
+						throw new Error('エラー："element"のキーが不足しています。' + JSON.stringify(element));
 					//labelの対策
-					if (element.label === undefined && Object.keys(element).length !== 13) throw new Error('エラー："element"のキーの数が異常です。');
-					if (element.label !== undefined && Object.keys(element).length !== 14) throw new Error('エラー："element"のキーの数が異常です。');
+					if (element.label === undefined && Object.keys(element).length !== 14) throw new Error('エラー："element"のキーの数が異常です。');
+					if (element.label !== undefined && Object.keys(element).length !== 15) throw new Error('エラー："element"のキーの数が異常です。');
 				}
 
 				world.setDynamicProperty(`cf:${form_name}`, tag);
@@ -93,64 +94,61 @@ system.afterEvents.scriptEventReceive.subscribe(async (ev) => {
 function send({ sender, id, message }: { sender: Player; id: string; message: string }): Promise<resultType> {
 	return new Promise<resultType>((resolve) => {
 		system.run(async () => {
-			if (forms[id.replace("cfs:", "")]) {
-				//forms.tsに追加されている場合
-				const { form, response } = forms[id.replace("cfs:", "")];
-				const result = await form(sender, message).sendPlayer(sender);
-				//登録されている関数を実行する
-				response(result, sender);
-				return result;
-			} else {
-				//されていない場合
-				const form_name = id.replace("cfs:", "");
-				const form_data = world.getDynamicProperty(`cf:${form_name}`) as string | undefined;
-				if (form_data === undefined) return sender.sendMessage(`エラー：フォーム"${form_name}"は見つかりませんでした。`);
-				//全体パース=>変数取得=>要素文字化=>要素置き換え=>要素パース
-				const parsed_form_data = JSON.parse(form_data);
-				const variables_value = parsed_form_data["variables"];
-				const variable = variables(form_name, variables_value, message, { player: sender });
+			const form_name = id.replace("cfs:", "");
+			const form_data = world.getDynamicProperty(`cf:${form_name}`) as string | undefined;
+			if (form_data === undefined) return sender.sendMessage(`エラー：フォーム"${form_name}"は見つかりませんでした。`);
+			//全体パース=>変数取得=>要素文字化=>要素置き換え=>要素パース
+			const parsed_form_data = JSON.parse(form_data);
+			const variables_value = parsed_form_data["variables"];
+			const variable = variables(form_name, variables_value, message, { player: sender });
 
-				const elements: formElementsVariableTypes.elementPropertiesTypes.all[] = JSON.parse(variableReplacer(JSON.stringify(parsed_form_data["elements"]), variable));
-				const converted_elements: customFormType.elementPropertiesTypes.all[] = elements.map((element) => {
-					const converted_form_data: customFormType.elementPropertiesTypes.all = {
-						h: Number.isNaN(Number(element.h)) ? 0 : Number(element.h),
-						w: Number.isNaN(Number(element.w)) ? 0 : Number(element.w),
-						x: Number.isNaN(Number(element.x)) ? 0 : Number(element.x),
-						y: Number.isNaN(Number(element.y)) ? 0 : Number(element.y),
-						text: String(element.text).replace(/\\n/g, "\n"),
-						texture: String(element.texture).replace(/\\n/g, "\n"),
-						hover_text: String(element.hover_text).replace(/\\n/g, "\n"),
-						aux: Number.isNaN(Number(element.aux)) ? 0 : Number(element.aux),
-						is_show_button: Boolean(element.is_show_button === "true"),
-						is_show_close: Boolean(element.is_show_close === "true"),
-						is_show_text: Boolean(element.is_show_text === "true"),
-						is_show_image: Boolean(element.is_show_image === "true"),
-						is_show_item: Boolean(element.is_show_item === "true"),
-						label: element.label,
-					};
-					return converted_form_data;
-				});
-				const form_size: { x: string; y: string } = parsed_form_data["form_size"];
-				const converted_form_size = {
-					x: Number.isNaN(Number(form_size.x)) ? 0 : Number(form_size.x),
-					y: Number.isNaN(Number(form_size.y)) ? 0 : Number(form_size.y),
+			const elements: formElementsVariableTypes.elementPropertiesTypes.all[] = JSON.parse(variableReplacer(JSON.stringify(parsed_form_data["elements"]), variable));
+			const converted_elements: customFormType.elementPropertiesTypes.all[] = elements.map((element) => {
+				const converted_form_data: customFormType.elementPropertiesTypes.all = {
+					h: Number.isNaN(Number(element.h)) ? 0 : Number(element.h),
+					w: Number.isNaN(Number(element.w)) ? 0 : Number(element.w),
+					x: Number.isNaN(Number(element.x)) ? 0 : Number(element.x),
+					y: Number.isNaN(Number(element.y)) ? 0 : Number(element.y),
+					text: String(element.text).replace(/\\n/g, "\n"),
+					texture: String(element.texture).replace(/\\n/g, "\n"),
+					command: String(element.command).replace(/\\n/g, "\n"),
+					hover_text: String(element.hover_text).replace(/\\n/g, "\n"),
+					aux: Number.isNaN(Number(element.aux)) ? 0 : Number(element.aux),
+					is_show_button: Boolean(element.is_show_button === "true"),
+					is_show_close: Boolean(element.is_show_close === "true"),
+					is_show_text: Boolean(element.is_show_text === "true"),
+					is_show_image: Boolean(element.is_show_image === "true"),
+					is_show_item: Boolean(element.is_show_item === "true"),
+					label: element.label,
 				};
+				return converted_form_data;
+			});
+			const form_size: { x: string; y: string } = parsed_form_data["form_size"];
+			const converted_form_size = {
+				x: Number.isNaN(Number(form_size.x)) ? 0 : Number(form_size.x),
+				y: Number.isNaN(Number(form_size.y)) ? 0 : Number(form_size.y),
+			};
 
-				const is_show_form_frame = parsed_form_data["is_show_form_frame"] === "true";
+			const is_show_form_frame = parsed_form_data["is_show_form_frame"] === "true";
 
-				const custom_form = new customForm({ ...converted_form_size }, form_name, is_show_form_frame);
-				converted_elements.map((element) => {
-					const options: customFormType.elementPropertiesOption.customOption = {};
-					if (element.is_show_button) options.buttonOption = {};
-					if (element.is_show_close) options.closeButtonOption = {};
-					if (element.is_show_image) options.imageOption = { texture: element.texture };
-					if (element.is_show_text) options.textOption = { text: element.text };
-					if (element.is_show_item) options.itemRendererOption = { aux: element.aux };
-					if (element.hover_text !== "") options.hoverTextOption = { hover_text: element.hover_text };
-					custom_form.addElement("custom", element.w, element.h, element.x, element.y, options, element.label);
-				});
-				resolve(custom_form.sendPlayer(sender));
+			const custom_form = new customForm({ ...converted_form_size }, form_name, is_show_form_frame);
+			converted_elements.map((element) => {
+				const options: customFormType.elementPropertiesOption.customOption = {};
+				if (element.is_show_button) options.buttonOption = { command: element.command };
+				if (element.is_show_close) options.closeButtonOption = {};
+				if (element.is_show_image) options.imageOption = { texture: element.texture };
+				if (element.is_show_text) options.textOption = { text: element.text };
+				if (element.is_show_item) options.itemRendererOption = { aux: element.aux };
+				if (element.hover_text !== "") options.hoverTextOption = { hover_text: element.hover_text };
+				custom_form.addElement("custom", element.w, element.h, element.x, element.y, options, element.label);
+			});
+			const form_result = await custom_form.sendPlayer(sender);
+			if (!form_result.canceled) {
+				//コマンド実行
+				const command = converted_elements[(form_result.selection ?? -1 + 4) - 4].command;
+				if (command) sender.runCommandAsync(command);
 			}
+			resolve(form_result);
 		});
 	});
 }

@@ -24,18 +24,9 @@ export default (form_name: string, variable: { [key: string]: string }, message:
 		player_location_z: args.player.location.z,
 	};
 
-	//フォームごとの変数を定義
-	const variables: { default: { [key: string]: string | number | boolean }; custom: { [form_name: string]: { [key: string]: string | number | boolean } } } = {
-		default: {
-			...variable,
-			...default_variable,
-			...parse_arg,
-		},
-		custom: {
-			custom_form: { ...default_variable },
-		},
+	return {
+		...variable,
+		...default_variable,
+		...parse_arg,
 	};
-
-	//フォーム名にあった変数があるならそれを返し、なければデフォルトの変数を返す
-	return variables.custom[form_name] ?? variables.default;
 };

@@ -10,7 +10,9 @@ export namespace customFormType {
 		label?: string;
 	}
 	export namespace elementPropertiesOption {
-		export interface buttonOption {}
+		export interface buttonOption {
+			command?: string;
+		}
 		export interface closeButtonOption {}
 		export interface textOption {
 			text: string;
@@ -66,7 +68,9 @@ export namespace formElementsVariableTypes {
 		label?: string;
 	}
 	export namespace elementPropertiesOption {
-		export interface buttonOption {}
+		export interface buttonOption {
+			command?: string;
+		}
 		export interface closeButtonOption {}
 		export interface textOption {
 			text: string;
@@ -146,7 +150,7 @@ export class customForm {
 	addElement(type: "hover_text", sizeW: number, sizeH: number, offsetX: number, offsetY: number, hover_text: string, selectedLabel?: string): customForm;
 	addElement(type: "image", sizeW: number, sizeH: number, offsetX: number, offsetY: number, texture: string, selectedLabel?: string): customForm;
 	addElement(type: "item", sizeW: number, sizeH: number, offsetX: number, offsetY: number, aux: number, selectedLabel?: string): customForm;
-	addElement(type: "button", sizeW: number, sizeH: number, offsetX: number, offsetY: number, selectedLabel?: string): customForm;
+	addElement(type: "button", sizeW: number, sizeH: number, offsetX: number, offsetY: number, command: string, selectedLabel?: string): customForm;
 	addElement(type: "close_button", sizeW: number, sizeH: number, offsetX: number, offsetY: number, selectedLabel?: string): customForm;
 	addElement(
 		type: "button" | "close_button" | "text" | "hover_text" | "image" | "item" | "custom",
@@ -165,6 +169,7 @@ export class customForm {
 			hover_text: "",
 			text: "",
 			texture: "",
+			command: "",
 			aux: 0,
 			is_show_button: false,
 			is_show_close: false,
@@ -175,7 +180,8 @@ export class customForm {
 		switch (type) {
 			case "button":
 				properties.is_show_button = true;
-				label = args[0] as string | undefined;
+				properties.command = args[0] as string;
+				label = args[1] as string | undefined;
 				break;
 			case "close_button":
 				properties.is_show_close = true;
@@ -209,6 +215,7 @@ export class customForm {
 				properties.is_show_item = custom_option.itemRendererOption !== undefined;
 				properties.text = custom_option.textOption?.text ?? "";
 				properties.texture = custom_option.imageOption?.texture ?? "";
+				properties.command = custom_option.buttonOption?.command ?? "";
 				properties.hover_text = custom_option.hoverTextOption?.hover_text ?? "";
 				properties.aux = custom_option.itemRendererOption?.aux ?? 0;
 				label = args[1] as string | undefined;
@@ -290,6 +297,7 @@ class customFormEncoder {
 				text: "",
 				texture: "textures/ui/translucent_black",
 				aux: 0,
+				command: "",
 			},
 			{
 				//枠
@@ -306,6 +314,7 @@ class customFormEncoder {
 				text: "",
 				texture: "textures/ui/dialog_background_hollow_3",
 				aux: 0,
+				command: "",
 			},
 			{
 				//X
@@ -322,6 +331,7 @@ class customFormEncoder {
 				text: "",
 				texture: "",
 				aux: 0,
+				command: "",
 			},
 			{
 				//Title
@@ -338,6 +348,7 @@ class customFormEncoder {
 				text: `§0${title}`,
 				texture: "",
 				aux: 0,
+				command: "",
 			},
 		];
 		const form_frame_labels: (string | undefined)[] = is_show_form_frame ? ["backgroundImage", "frameImage", "closeButton", "titleText", ...labels] : labels;
