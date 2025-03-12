@@ -9352,4 +9352,4 @@ export const typeIds = {
 	vanilla_data_type: "item",
 };
 
-export const typeIdToID = new Map(typeIds.data_items.map((v) => [v.name, v.raw_id]));
+export const typeIdToID = new Map(typeIds.data_items.map((v) => [v.name.replace("minecraft:", ""), v.raw_id]));
