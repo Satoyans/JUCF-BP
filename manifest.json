@@ -6,9 +6,9 @@
 	"header": {
 		"name": "JUCF-BP",
 		"description": "",
-		"min_engine_version": [1, 20, 80],
+		"min_engine_version": [1, 21, 60],
 		"uuid": "1df1845f-8f48-4609-b2a4-1c85c6eb6173",
-		"version": [1, 1, 0]
+		"version": [1, 2, 0]
 	},
 	"modules": [
 		{
