@@ -279,7 +279,10 @@ export function openGui(sender: Player) {
 		form.label("管理するフォームを選択してください：");
 		for (const key of form_keys) {
 			form.button(key, () => {
-				openFormDetail(sender, key);
+				form.close();
+				system.run(() => {
+					openFormDetail(sender, key);
+				});
 			});
 		}
 	}
@@ -288,6 +291,10 @@ export function openGui(sender: Player) {
 	form.divider();
 	form.button("タグからインポート", () => {
 		importFromTags(sender);
+		form.close();
+		system.run(() => {
+			openGui(sender);
+		});
 	});
 	form.closeButton();
 	form.show().catch((e) => console.error(e));
@@ -303,13 +310,19 @@ function openFormDetail(sender: Player, selected_key: string) {
 
 	// 1. 表示
 	detailForm.button("表示", () => {
-		openForm(sender, selected_key, "");
-		sender.sendMessage(`"jucf:${selected_key}"を表示しました。`);
+		detailForm.close();
+		system.run(() => {
+			openForm(sender, selected_key, "");
+			sender.sendMessage(`"jucf:${selected_key}"を表示しました。`);
+		});
 	});
 
 	// 2. 改名
 	detailForm.button("改名", () => {
-		openRenameForm(sender, selected_key);
+		detailForm.close();
+		system.run(() => {
+			openRenameForm(sender, selected_key);
+		});
 	});
 
 	// 3. コピー
@@ -323,28 +336,38 @@ function openFormDetail(sender: Player, selected_key: string) {
 		const renamed_form_data = JSON.stringify({ ...JSON.parse(selected_form_data), form_name: copyName });
 		world.setDynamicProperty(`jucf:${copyName}`, renamed_form_data);
 		sender.sendMessage(`"jucf:${copyName}"を作成しました。`);
-		openGui(sender);
+		detailForm.close();
+		system.run(() => {
+			openGui(sender);
+		});
 	});
 
 	// 4. 削除 (MessageBox による確認)
 	detailForm.button("削除", () => {
-		const confirmBox = new MessageBox(sender, "フォーム削除の確認")
-			.body(`本当にフォーム "jucf:${selected_key}" を削除しますか？\nこの操作は取り消せません。`)
-			.button1("削除")
-			.button2("キャンセル");
+		detailForm.close();
+		system.run(() => {
+			const confirmBox = new MessageBox(sender, "フォーム削除の確認")
+				.body(`本当にフォーム "jucf:${selected_key}" を削除しますか？\nこの操作は取り消せません。`)
+				.button1("削除")
+				.button2("キャンセル");
 
-		confirmBox
-			.show()
-			.then((res) => {
-				if (res.selection === 1) {
-					world.setDynamicProperty(`jucf:${selected_key}`);
-					sender.sendMessage(`"jucf:${selected_key}"を削除しました。`);
-					openGui(sender);
-				} else {
-					openFormDetail(sender, selected_key);
-				}
-			})
-			.catch((e) => console.error(e));
+			confirmBox
+				.show()
+				.then((res) => {
+					if (res.selection === 1) {
+						world.setDynamicProperty(`jucf:${selected_key}`);
+						sender.sendMessage(`"jucf:${selected_key}"を削除しました。`);
+						system.run(() => {
+							openGui(sender);
+						});
+					} else {
+						system.run(() => {
+							openFormDetail(sender, selected_key);
+						});
+					}
+				})
+				.catch((e) => console.error(e));
+		});
 	});
 
 	// 5. コンテンツログに出力
@@ -356,13 +379,15 @@ function openFormDetail(sender: Player, selected_key: string) {
 		}
 		console.warn(JSON.stringify(selected_form_data));
 		sender.sendMessage(`コンテンツログに出力しました。`);
-		openFormDetail(sender, selected_key);
 	});
 
 	detailForm.spacer();
 	detailForm.divider();
 	detailForm.button("一覧に戻る", () => {
-		openGui(sender);
+		detailForm.close();
+		system.run(() => {
+			openGui(sender);
+		});
 	});
 	detailForm.closeButton();
 	detailForm.show().catch((e) => console.error(e));
@@ -384,7 +409,10 @@ function openRenameForm(sender: Player, selected_key: string) {
 			return;
 		}
 		if (newName === selected_key) {
-			openFormDetail(sender, selected_key);
+			renameForm.close();
+			system.run(() => {
+				openFormDetail(sender, selected_key);
+			});
 			return;
 		}
 		const form_keys = world
@@ -394,7 +422,6 @@ function openRenameForm(sender: Player, selected_key: string) {
 
 		if (form_keys.includes(newName)) {
 			sender.sendMessage("エラー：そのフォーム名は既に存在します。");
-			openRenameForm(sender, selected_key);
 			return;
 		}
 
@@ -408,11 +435,17 @@ function openRenameForm(sender: Player, selected_key: string) {
 		world.setDynamicProperty(`jucf:${selected_key}`);
 		world.setDynamicProperty(`jucf:${newName}`, renamed_form_data);
 		sender.sendMessage(`"jucf:${selected_key}"から"jucf:${newName}"に改名しました。`);
-		openFormDetail(sender, newName);
+		renameForm.close();
+		system.run(() => {
+			openFormDetail(sender, newName);
+		});
 	});
 
 	renameForm.button("キャンセル", () => {
-		openFormDetail(sender, selected_key);
+		renameForm.close();
+		system.run(() => {
+			openFormDetail(sender, selected_key);
+		});
 	});
 	renameForm.closeButton();
 	renameForm.show().catch((e) => console.error(e));
