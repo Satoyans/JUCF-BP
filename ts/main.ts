@@ -59,7 +59,7 @@ system.beforeEvents.startup.subscribe((init: StartupEvent) => {
 				},
 			],
 		},
-		(origin: CustomCommandOrigin, args: any[]): CustomCommandResult => {
+		(origin: CustomCommandOrigin, formName: string, message?: string): CustomCommandResult => {
 			const sender = origin.sourceEntity;
 			if (!(sender instanceof Player)) {
 				return {
@@ -67,10 +67,8 @@ system.beforeEvents.startup.subscribe((init: StartupEvent) => {
 					message: "このコマンドはプレイヤーのみ実行できます。",
 				};
 			}
-			const formName = args[0] as string;
-			const message = (args[1] as string | undefined) ?? "";
 			system.run(() => {
-				openForm(sender, formName, message);
+				openForm(sender, formName, message ?? "");
 			});
 			return {
 				status: CustomCommandStatus.Success,
