@@ -1,0 +1,28 @@
+{
+  "name": "jucf-bp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "dev": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Satoyans/JUCF-BP.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Satoyans/JUCF-BP/issues"
+  },
+  "homepage": "https://github.com/Satoyans/JUCF-BP#readme",
+  "dependencies": {
+    "@minecraft/server": "^2.10.0",
+    "@minecraft/server-ui": "^2.2.0"
+  }
+}
