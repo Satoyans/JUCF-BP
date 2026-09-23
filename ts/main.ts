@@ -40,7 +40,7 @@ system.beforeEvents.startup.subscribe((init: StartupEvent) => {
 		}
 	);
 
-	// /jucf:open <form_name> [message] - フォームを開く
+	// /jucf:open <form_name> [args] - フォームを開く
 	init.customCommandRegistry.registerCommand(
 		{
 			name: "jucf:open",
@@ -54,12 +54,12 @@ system.beforeEvents.startup.subscribe((init: StartupEvent) => {
 			],
 			optionalParameters: [
 				{
-					name: "message",
+					name: "args",
 					type: CustomCommandParamType.String,
 				},
 			],
 		},
-		(origin: CustomCommandOrigin, formName: string, message?: string): CustomCommandResult => {
+		(origin: CustomCommandOrigin, formName: string, args?: string): CustomCommandResult => {
 			const sender = origin.sourceEntity;
 			if (!(sender instanceof Player)) {
 				return {
@@ -68,7 +68,7 @@ system.beforeEvents.startup.subscribe((init: StartupEvent) => {
 				};
 			}
 			system.run(() => {
-				openForm(sender, formName, message ?? "");
+				openForm(sender, formName, args ?? "");
 			});
 			return {
 				status: CustomCommandStatus.Success,
@@ -183,7 +183,7 @@ export function importFromTags(executor: Player) {
 /**
  * JUCFフォームを表示します。
  */
-export function openForm(sender: Player, formName: string, message: string = ""): Promise<resultType | undefined> {
+export function openForm(sender: Player, formName: string, args: string = ""): Promise<resultType | undefined> {
 	return new Promise<resultType | undefined>((resolve) => {
 		system.run(async () => {
 			const form_data = world.getDynamicProperty(`jucf:${formName}`) as string | undefined;
@@ -196,7 +196,7 @@ export function openForm(sender: Player, formName: string, message: string = "")
 				// 全体パース=>変数取得=>要素文字化=>要素置き換え=>要素パース
 				const parsed_form_data = JSON.parse(form_data);
 				const variables_value = parsed_form_data["variables"];
-				const variable = variables(formName, variables_value, message, { player: sender });
+				const variable = variables(formName, variables_value, args, { player: sender });
 
 				const elements: formElementsVariableTypes.elementPropertiesTypes.all[] = JSON.parse(
 					variableReplacer(JSON.stringify(parsed_form_data["elements"]), variable)
